@@ -1,0 +1,18 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'functions', 'deploy',
+      'send-to-me',
+      '--trigger-http',
+      '--runtime', 'go116',
+      '--entry-point', 'SendToMe',
+    ]
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'functions', 'deploy',
+      'send-to-followers',
+      '--trigger-http',
+      '--runtime', 'go116',
+      '--entry-point', 'SendToFollowers',
+    ]
