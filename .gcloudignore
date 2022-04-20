@@ -12,3 +12,5 @@
 # below:
 .git
 .gitignore
+
+pull_request_template.md
