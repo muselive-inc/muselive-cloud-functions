@@ -38,11 +38,6 @@ type (
 		HallID      string `json:"hallId"`
 		ShowID      string `json:"showId"`
 	}
-
-	SendTimestampMessage struct {
-		NotiType string `json:"notiType"`
-		ShowId   string `json:"showId"`
-	}
 )
 
 const (
@@ -50,12 +45,13 @@ const (
 	NOTI_CATEGORY_HALL   = constants.NOTI_CATEGORY_HALL
 )
 
-func batchMessageSend(ctx context.Context, message *messaging.MulticastMessage, client *messaging.Client, ch chan<- *messaging.BatchResponse, wg *sync.WaitGroup) {
+func batchMessageSend(ctx context.Context, message *messaging.MulticastMessage, client *messaging.Client, ch chan<- *messaging.BatchResponse, errorCh chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	batchResponse, err := client.SendMulticast(ctx, message)
 	if err != nil {
-		logger.Error(errors.WithStack(err))
+		errorCh <- err
+		return
 	}
 	ch <- batchResponse
 }
@@ -76,7 +72,8 @@ func (s *ScheduledShowTaskMessage) Send(ctx context.Context, client *messaging.C
 
 	var wg sync.WaitGroup
 	batchSize := int(math.Ceil(float64(numFollowers / FCM_TOKENS_THRESHOLD)))
-	sendChan := make(chan *messaging.BatchResponse, batchSize)
+	sendChan := make(chan *messaging.BatchResponse)
+	errorChan := make(chan error)
 
 	wg.Add(batchSize)
 	for i := 0; i < numFollowers; i += FCM_TOKENS_THRESHOLD {
@@ -100,15 +97,19 @@ func (s *ScheduledShowTaskMessage) Send(ctx context.Context, client *messaging.C
 			},
 			Tokens: batchTokens,
 		}
-		go batchMessageSend(ctx, message, client, sendChan, &wg)
+		go batchMessageSend(ctx, message, client, sendChan, errorChan, &wg)
 	}
 
 	wg.Wait()
 	numSuccess, numFail := 0, 0
 	for i := 0; i < batchSize; i++ {
-		resp := (<-sendChan)
-		numSuccess += resp.SuccessCount
-		numFail += resp.FailureCount
+		select {
+		case resp := <-sendChan:
+			numSuccess += resp.SuccessCount
+			numFail += resp.FailureCount
+		case err := <-errorChan:
+			logger.Error(errors.WithStack(err))
+		}
 	}
 	logger.Info("Message sending complete!")
 	logger.Infof("Success: %d, failure: %d, total %d\n", numSuccess, numFail, numFollowers)

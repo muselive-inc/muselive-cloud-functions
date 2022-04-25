@@ -2,17 +2,17 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'functions', 'deploy',
-      'send-to-me',
+      'my-show',
       '--trigger-http',
       '--runtime', 'go116',
-      '--entry-point', 'SendToMe',
+      '--entry-point', 'SendMyShowNoti',
     ]
 
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'functions', 'deploy',
-      'send-to-followers',
+      'scheduled-show',
       '--trigger-http',
       '--runtime', 'go116',
-      '--entry-point', 'SendToFollowers',
+      '--entry-point', 'SendScheduledShowNoti',
     ]

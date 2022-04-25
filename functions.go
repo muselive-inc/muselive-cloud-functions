@@ -46,7 +46,7 @@ func init() {
 	logger.Infof("Successfully initialized cloud function")
 }
 
-func SendToFollowers(w http.ResponseWriter, r *http.Request) {
+func SendScheduledShowNoti(w http.ResponseWriter, r *http.Request) {
 	var msg services.ScheduledShowTaskMessage
 
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
@@ -71,7 +71,7 @@ func SendToFollowers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func SendToMe(w http.ResponseWriter, r *http.Request) {
+func SendMyShowNoti(w http.ResponseWriter, r *http.Request) {
 	var msg services.MyShowTaskMessage
 
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {

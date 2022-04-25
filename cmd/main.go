@@ -13,7 +13,7 @@ func main() {
 	// Use PORT environment variable, or default to 8080.
 	// Cloud functions can be registered only one at a time for a given url.
 	if err := funcframework.RegisterHTTPFunctionContext(
-		ctx, "/send-to-me", functions.SendToMe); err != nil {
+		ctx, "/my-show", functions.SendMyShowNoti); err != nil {
 		log.Fatalf("funcframework.RegisterHTTPFunctionContext: %v\n", err)
 	}
 

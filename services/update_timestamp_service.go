@@ -2,14 +2,15 @@ package services
 
 import (
 	"bytes"
-	"encoding/json"
-	"os"
-	"net/http"
-	"github.com/pkg/errors"
-	"fmt"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/pkg/errors"
 )
 
 type (
